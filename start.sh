@@ -7,8 +7,16 @@ if [[ -z "$NGROK_TOKEN" ]]; then
 fi
 
 if [[ -z "$USER_PASS" ]]; then
-  echo "Please set 'USER_PASS' for user: $USER"
+  echo "Please set 'USER_PASS'"
   exit 3
+fi
+
+# Dapatkan nama pengguna saat ini
+USERNAME=$(whoami)
+
+if [[ -z "$USERNAME" ]]; then
+  echo "Unable to determine the username."
+  exit 4
 fi
 
 # Instalasi dan konfigurasi ZeroTierOne
@@ -26,8 +34,8 @@ curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
   | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrok
 
 # Update password pengguna
-echo "### Update user: $USER password ###"
-echo -e "$USER_PASS\n$USER_PASS" | sudo passwd "$USER"
+echo "### Update user: $USERNAME password ###"
+echo -e "$USER_PASS\n$USER_PASS" | sudo passwd "$USERNAME"
 
 # Jalankan Ngrok untuk port 22 (SSH)
 echo "### Start ngrok proxy for port 22 ###"
@@ -41,9 +49,9 @@ HAS_ERRORS=$(grep "command failed" < .ngrok.log)
 if [[ -z "$HAS_ERRORS" ]]; then
   echo ""
   echo "=========================================="
-  echo "To connect: $(grep -o -E "tcp://(.+)" < .ngrok.log | sed "s/tcp:\/\//ssh $USER@/" | sed "s/:/ -p /")"
+  echo "To connect: $(grep -o -E "tcp://(.+)" < .ngrok.log | sed "s/tcp:\/\//ssh $USERNAME@/" | sed "s/:/ -p /")"
   echo "=========================================="
 else
   echo "$HAS_ERRORS"
-  exit 4
+  exit 5
 fi
