@@ -26,8 +26,8 @@ curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
   | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrok
 
 # Update password pengguna
-echo "### Update user: root password ###"
-echo -e "$USER_PASS\n$USER_PASS" | sudo passwd "root"
+echo "### Update user: $USER password ###"
+echo -e "$USER_PASS\n$USER_PASS" | sudo passwd "$USER"
 
 # Jalankan Ngrok untuk port 22 (SSH)
 echo "### Start ngrok proxy for port 22 ###"
@@ -41,7 +41,7 @@ HAS_ERRORS=$(grep "command failed" < .ngrok.log)
 if [[ -z "$HAS_ERRORS" ]]; then
   echo ""
   echo "=========================================="
-  echo "To connect: $(grep -o -E "tcp://(.+)" < .ngrok.log | sed "s/tcp:\/\//ssh root@/" | sed "s/:/ -p /")"
+  echo "To connect: $(grep -o -E "tcp://(.+)" < .ngrok.log | sed "s/tcp:\/\//ssh $USER@/" | sed "s/:/ -p /")"
   echo "=========================================="
 else
   echo "$HAS_ERRORS"
